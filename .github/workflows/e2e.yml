@@ -46,5 +46,8 @@ jobs:
       - name: Seed db
         run: docker exec -i testtechnique-db psql -U postgres -d postgres < ./prisma/seed.sql
 
+      - name: Generate orm client
+        run: npx prisma generate
+
       - name: Run the e2e test
         run: yarn workspace @delivery/jobs run test
