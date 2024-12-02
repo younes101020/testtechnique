@@ -1,0 +1,50 @@
+name: Running unittest on jobs service
+
+on:
+  push:
+    paths:
+      - 'src/**'
+
+jobs:
+  testtechnique:
+    runs-on: ubuntu-latest
+    environment: test
+    services:
+      db:
+        image: postgres
+        name: testtechnique-db
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Push db
+        run: npx prisma db push
+
+      - name: Seed db
+        run: docker exec -i testtechnique-db psql -U postgres -d postgres < ./prisma/seed.sql
+
+      - name: Run the e2e test
+        run: yarn workspace @delivery/jobs run test
