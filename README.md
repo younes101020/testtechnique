@@ -1,7 +1,7 @@
 # Installation
 
 ```bash
-git clone 
+git clone git@github.com:younes101020/testtechnique.git
 yarn install
 ```
 
